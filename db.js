@@ -52,30 +52,31 @@ Things.belongsTo(Person);
 
 const syncAndSeed = async () =>{
   await  conn.sync({force: true});
-  const places = [
-    {name: 'LA'},
-    {name: 'London'},
-    {name: 'Barcelona'}
-  ];
+  const [laPlace, londonPlace, barcelonaPlace ] = await Promise.all([
+    Places.create({name: 'LA'}),
+    Places.create({name: 'London'}),
+    Places.create({name: 'Barcelona'})
+  ]);
 
-  await Promise.all(places.map(place => Places.create(place)));
-
-  const person = [
-    {name: 'John'},
-    {name: 'James'},
-    {name: 'Sarah'}
-  ];
-
-  await Promise.all(person.map(person => Person.create(person)));
+  const [ john, james, sarah] = await Promise.all([
+    Person.create({name: 'John', placeId: laPlace.id }),
+    Person.create({name: 'James', placeId: londonPlace.id}),
+    Person.create({name: 'Sarah', placeId: barcelonaPlace.id})
+  ]);
 
   const things = [
-    {name: 'pen',},
-    {name: 'paper'},
-    {name: 'typewriter'}
+    {name: 'pen', personId: john.id},
+    {name: 'paper', personId: james.id},
+    {name: 'typewriter', personId: sarah.id}
   ];
   await Promise.all(things.map(thing => Things.create(thing)));
 };
 
 module.exports = {
-  syncAndSeed
+  syncAndSeed,
+  models:{
+    Person,
+    Places,
+    Things
+  }
 };
